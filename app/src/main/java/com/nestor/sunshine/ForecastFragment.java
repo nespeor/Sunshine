@@ -33,7 +33,7 @@ import java.util.ArrayList;
  */
 public class ForecastFragment extends Fragment {
 
-    private ArrayAdapter<String> mForecastAdapter;
+    public ArrayAdapter<String> mForecastAdapter;
 
     public ForecastFragment() {
     }
@@ -56,7 +56,7 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             FetchWeatherTask fetchweathertask = new FetchWeatherTask();
-            fetchweathertask.execute("94043", null, null);
+            fetchweathertask.execute("94043");
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -77,8 +77,7 @@ public class ForecastFragment extends Fragment {
 
         mForecastAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast, R.id.list_item_forecast_textview, list);
 
-        ListView listView = (ListView) rootView.findViewById(
-                R.id.listview_forecast);
+        ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
 
         listView.setAdapter(mForecastAdapter);
 
@@ -192,7 +191,13 @@ public class ForecastFragment extends Fragment {
         }
 
         @Override
-        protected String[] doInBackground(String... uriParams) {
+        protected String[] doInBackground(String... params) {
+
+
+            // If there's no zip code, there's nothing to look up.  Verify size of params.
+            if (params.length == 0) {
+                return null;
+            }
 
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
@@ -202,27 +207,31 @@ public class ForecastFragment extends Fragment {
             // Will contain the raw JSON response as a string.
             String forecastJsonStr = null;
 
+            String format = "json";
+            String units = "metric";
+            int numDays = 7;
+
             try {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are avaiable at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
 
-                Uri.Builder builder = new Uri.Builder();
-                builder.scheme("http")
-                        .authority("api.openweathermap.org")
-                        .appendPath("data")
-                        .appendPath("2.5")
-                        .appendPath("forecast")
-                        .appendPath("daily")
-                        .appendQueryParameter("q", uriParams[0])
-                        .appendQueryParameter("mode", "json")
-                        .appendQueryParameter("units", "metric")
-                        .appendQueryParameter("cnt", "7");
-                //.fragment("section-name");
-                String urlString = builder.build().toString();
+                final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?";
+                final String QUERY_PARAM = "q";
+                final String FORMAT_PARAM = "mode";
+                final String UNITS_PARAM = "units";
+                final String DAYS_PARAM = "cnt";
 
-                URL url = new URL(urlString);
-                //URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7");
+                Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
+                .appendQueryParameter(QUERY_PARAM, params[0])
+                .appendQueryParameter(FORMAT_PARAM, format)
+                .appendQueryParameter(UNITS_PARAM, units)
+                .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                .build();
+
+                URL url = new URL(builtUri.toString());
+
+                Log.v(LOG_TAG, "Built URI " + builtUri.toString());
 
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -273,7 +282,7 @@ public class ForecastFragment extends Fragment {
             }
 
             try {
-                return getWeatherDataFromJson(forecastJsonStr, 1); //numDays
+                return getWeatherDataFromJson(forecastJsonStr, numDays); //numDays
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
@@ -283,9 +292,18 @@ public class ForecastFragment extends Fragment {
             return null;
         }
 
+        @Override
+        protected void onPostExecute(String[] result) {
+            //super.onPostExecute(result);
 
-
-
+            if (result != null) {
+                mForecastAdapter.clear();
+                for (String dayForecastStr : result) {
+                    mForecastAdapter.add(dayForecastStr);
+                }
+                // New data is back from the server.  Hooray!
+            }
+        }
     }
 
 }
