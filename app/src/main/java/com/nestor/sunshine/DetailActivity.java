@@ -1,10 +1,17 @@
 package com.nestor.sunshine;
 
+import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -18,8 +25,9 @@ public class DetailActivity extends ActionBarActivity {
         Intent intent = getIntent();
         String forecast = intent.getStringExtra(Intent.EXTRA_TEXT);
 
-        Toast toast = Toast.makeText(getApplicationContext(), forecast, Toast.LENGTH_SHORT);
-        toast.show();
+        //TextView data_day = new TextView();
+        //Toast toast = Toast.makeText(getApplicationContext(), forecast, Toast.LENGTH_SHORT);
+        //toast.show();
     }
 
 
@@ -43,5 +51,33 @@ public class DetailActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * A placeholder fragment containing a simple view.
+     */
+    public class PlaceholderFragment extends Fragment {
+
+
+        public PlaceholderFragment() {
+        }
+
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+
+            Intent intent = getActivity().getIntent();
+            View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+            if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
+                String forecastStr = intent.getStringExtra(Intent.EXTRA_TEXT);
+                ((TextView) rootView.findViewById(R.id.week_day_textview))
+                        .setText(forecastStr);
+            }
+
+
+
+            return rootView;
+        }
     }
 }

@@ -71,12 +71,12 @@ public class ForecastFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         ArrayList<String> list = new ArrayList();
-        list.add("Today - Sunny - 83/63");
-        list.add("Tomorrow - Sunny - 83/63");
-        list.add("Weds - Sunny - 83/63");
-        list.add("Thurs - Cloudy - 83/63");
-        list.add("Fri - Sunny - 83/63");
-        list.add("Sat - Sunny - 83/63");
+        list.add("... - ... - ...");
+        list.add("... - ... - ...");
+        list.add("... - ... - ...");
+        list.add("... - ... - ...");
+        list.add("... - ... - ...");
+        list.add("... - ... - ...");
 
         mForecastAdapter = new ArrayAdapter<String>(getActivity(), R.layout.list_item_forecast, R.id.list_item_forecast_textview, list);
 
